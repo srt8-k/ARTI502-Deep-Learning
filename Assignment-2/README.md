@@ -8,9 +8,12 @@ This folder contains reusable PyTorch scripts associated with Assignment 2. **Th
 - [assignment2_cifar10.py](assignment2_cifar10.py): dataset loading, three-block baseline CNN, deeper CNN, modified ResNet18, training/evaluation functions, curves, and held-out testing.
 - [efficientnetv2m.py](efficientnetv2m.py): ImageNet-pretrained **EfficientNetV2-M CNN**, CutMix, mixed precision, AdamW/OneCycleLR, 20-epoch fine-tuning, checkpoints, and validation-selected TTA.
 
-- [augmentation_demo.py](augmentation_demo.py): reproducible Task 4 visualization of ToPILImage, horizontal flip, resized crop, color jitter, rotation, Gaussian noise, and normalization.\n\n## Local/Colab setup
+- [augmentation_demo.py](augmentation_demo.py): reproducible Task 4 visualization of ToPILImage, horizontal flip, resized crop, color jitter, rotation, Gaussian noise, and normalization.
+
+## Local/Colab setup
 ```bash
 pip install torch torchvision timm matplotlib numpy
+python Assignment-2/augmentation_demo.py
 python Assignment-2/assignment2_cifar10.py --model baseline --epochs 20 --batch-size 128
 python Assignment-2/assignment2_cifar10.py --model deeper --epochs 20 --batch-size 128
 python Assignment-2/assignment2_cifar10.py --model resnet18 --epochs 100 --batch-size 128
