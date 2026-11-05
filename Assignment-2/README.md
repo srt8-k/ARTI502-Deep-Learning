@@ -1,47 +1,67 @@
-# Assignment 2 - Training and Testing CNNs on CIFAR-10
+# ARTI 502 — Assignment 2: CNN Training and Testing on CIFAR-10
 
-**ARTI 502 - Deep Learning, Term 1 (2026) | Group 9MA1 / Team 4**
+PyTorch implementation and experimental report resources for the ARTI 502 Deep Learning assignment.
 
-This folder contains reusable PyTorch scripts associated with Assignment 2. **The reported scores below were recorded in our Colab experiments; cloning these scripts does not reproduce the exact scores automatically.** Run full GPU experiments to validate results independently. CIFAR-10 training/validation indices use seed 42; the official test set is reserved for final evaluation.
+## Final measured result
 
-## Source code
-- [assignment2_cifar10.py](assignment2_cifar10.py): dataset loading, three-block baseline CNN, deeper CNN, modified ResNet18, training/evaluation functions, curves, and held-out testing.
-- [efficientnetv2m.py](efficientnetv2m.py): ImageNet-pretrained **EfficientNetV2-M CNN**, CutMix, mixed precision, AdamW/OneCycleLR, 20-epoch fine-tuning, checkpoints, and validation-selected TTA.
+**EfficientNetV2-XL (external CIFAR-10-pretrained checkpoint): 99.04% test accuracy (9,904 / 10,000), test cross-entropy loss 0.157579.** This score was measured in Google Colab on the official CIFAR-10 test split, using 224 × 224 bicubic resize and the documented CIFAR-10 normalization.
 
-- [augmentation_demo.py](augmentation_demo.py): reproducible Task 4 visualization of ToPILImage, horizontal flip, resized crop, color jitter, rotation, Gaussian noise, and normalization.
+**Important provenance:** The EfficientNetV2-XL checkpoint was **pretrained on CIFAR-10 by its publisher**, [DeKUT-DSAIL](https://huggingface.co/DeKUT-DSAIL/efficientnetv2-xl-cifar10-upsample). Our work loads and evaluates that checkpoint and adds reporting, confusion-matrix and per-class analysis. We do **not** claim to have trained these XL weights. The test split had also been evaluated during earlier exploration, so it should not be portrayed as untouched for model-selection purposes.
 
-## Local/Colab setup
+## Files
+
+| Path | Purpose |
+|---|---|
+| [Assignment2_CIFAR10_Clean.ipynb](Assignment2_CIFAR10_Clean.ipynb) | Main submission notebook: Tasks 1–6, executed outputs, augmentation demos, historical training plots and final benchmark |
+| [Assignment2_CIFAR10_Clean.py](Assignment2_CIFAR10_Clean.py) | Runnable PyTorch source with CNN, training/evaluation functions, dataset visualization, augmentations and optional XL evaluation |
+| [archive/Assignment2_Original_Experiments.ipynb](archive/Assignment2_Original_Experiments.ipynb) | Full 53-cell Colab record with prior CNN fine-tuning/ensemble experiments; retained for traceability |
+
+Do not upload `.pth` or `.safetensors` checkpoints to regular GitHub. The 831 MB external XL weights are available from the credited model repository; experiment checkpoints were saved in the original Colab/Google Drive environment.
+
+## Tasks covered
+
+1. **CIFAR-10 dataset:** download, training/validation split and sample counts.
+2. **CNN architecture:** convolution, ReLU, max pooling, and explicit training/evaluation functions.
+3. **Tensor dimensions and visualization:** batch `(N, C, H, W)` shape and Matplotlib examples.
+4. **Augmentation:** ToPILImage, flips, random resized crops, color jitter, rotation, normalization, noise and ToTensor.
+5. **Experiments and results:** baseline/deeper CNN training histories, ConvNeXtV2 training/validation curves, model comparisons and measured XL test loss/accuracy, confusion matrix and per-class performance.
+6. **Source submission:** readable `.ipynb` and standalone `.py` files.
+
+## Verified historical results
+
+| Experiment | Metric/split | Accuracy | Loss |
+|---|---|---:|---:|
+| Custom baseline CNN (20 epochs) | Best validation | 81.60% | See notebook history |
+| Deeper CNN (20 epochs) | Best validation | 89.98% | See notebook history |
+| ConvNeXtV2 (epoch 4) | Training | 99.06% | 0.0309 |
+| ConvNeXtV2 (epoch 4, flip TTA) | Validation | 98.58% | 0.0494 |
+| Three-CNN ensemble of locally fine-tuned models | Official test | 98.84% | 0.0396 |
+| **EfficientNetV2-XL (third-party pretrained weights)** | **Official test** | **99.04%** | **0.157579** |
+
+Training and validation curves belong to **ConvNeXtV2**, not EfficientNetV2-XL. The XL checkpoint's training history is not included or claimed.
+
+## Run in Google Colab
+
+1. Open [the notebook](Assignment2_CIFAR10_Clean.ipynb) in Colab and select a GPU runtime for large-model evaluation.
+2. Run setup, Task 1–4, and the Task 5 evaluation only if a fresh reproduction is needed. Historical figures/outputs are already saved in the notebook.
+3. The companion script can be run independently:
+
 ```bash
-pip install torch torchvision timm matplotlib numpy
-python Assignment-2/augmentation_demo.py
-python Assignment-2/assignment2_cifar10.py --model baseline --epochs 20 --batch-size 128
-python Assignment-2/assignment2_cifar10.py --model deeper --epochs 20 --batch-size 128
-python Assignment-2/assignment2_cifar10.py --model resnet18 --epochs 100 --batch-size 128
-python Assignment-2/efficientnetv2m.py --epochs 20 --batch-size 16 --accumulation 4
+pip install torch torchvision timm "huggingface_hub>=0.25,<2" safetensors matplotlib numpy
+python Assignment-2/Assignment2_CIFAR10_Clean.py --data-dir ./cifar_data --save-dir ./assignment2_outputs
+
+# Optional: train the small baseline CNN (20 epochs)
+python Assignment-2/Assignment2_CIFAR10_Clean.py --data-dir ./cifar_data --save-dir ./assignment2_outputs --train-baseline
+
+# Optional: re-evaluate external XL checkpoint (GPU and ~831 MB download)
+python Assignment-2/Assignment2_CIFAR10_Clean.py --data-dir ./cifar_data --save-dir ./assignment2_outputs --evaluate-xl
 ```
-Run with CUDA for practical GPU training. Pretrained EfficientNetV2 weights are downloaded automatically; the CIFAR-10 dataset is downloaded through torchvision.
 
-## Recorded CIFAR-10 results
-These results are **not fabricated**; they are transcribed from the user's completed Colab logs and corresponding report screenshots. **Validation is not test**.
+The `.py` script is a **companion reproduction/demo**, not a reimplementation of every advanced fine-tuning experiment. See the archived notebook for those Colab sessions. No retraining is required merely to inspect the final assignment evidence.
 
-| Experiment | Best validation accuracy | Final test accuracy | Final test loss |
-|---|---:|---:|---:|
-| Baseline CNN | 81.60% | Not independently recorded | - |
-| Deeper CNN | 89.98% | Not independently recorded | - |
-| ResNet18 (no TTA) | 95.32% | 94.88% | 0.2008 |
-| ResNet18 + horizontal flip | 95.72% | 95.37% | 0.1633 |
-| EfficientNetV2-M (original) | 98.78% | Not separately recorded | - |
-| **EfficientNetV2-M + horizontal flip** | **99.08%** | **98.59%** | **0.0990** |
-| DINOv2 + flip (**Transformer; optional only**) | 98.58% | 98.48% | 0.1489 |
+## Academic attribution and evaluation notes
 
-The strongest result *for the CNN assignment* is **98.59% on the official 10,000-image test set** using ImageNet-pretrained EfficientNetV2-M + horizontal flip TTA, selected on the 5,000-image validation split.
-
-### Experimental caution
-- Pretrained EfficientNetV2-M is a CNN but **not trained entirely from scratch**.
-- DINOv2 is a **Vision Transformer**, provided only as an extra comparison; it does not replace the CNN requirements.
-- Training loss/accuracy from the advanced CutMix experiment are calculated with mixed-label augmentation and therefore are not directly comparable to clean-image validation metrics.
-- Test accuracy should only be measured after model selection using validation, not used for repeated hyperparameter tuning.
-- The scripts are clean reusable implementations based on the Colab methodology; historical GPU run checkpoint files are **not** included in Git (large binaries).
-
-### Attribution
-The EfficientNetV2-M fine-tuning approach was informed by [hankyul2/EfficientNetV2-pytorch](https://github.com/hankyul2/EfficientNetV2-pytorch); this repository's implementation is original to this submission and uses the published timm model identifier \`tf_efficientnetv2_m.in21k_ft_in1k\`.
+- Original model checkpoint: [DeKUT-DSAIL/efficientnetv2-xl-cifar10-upsample](https://huggingface.co/DeKUT-DSAIL/efficientnetv2-xl-cifar10-upsample).
+- Model architecture is created through `timm` as `tf_efficientnetv2_xl` with 10 output classes; publisher's `model.safetensors` is loaded strictly.
+- Numbers in this README are taken from completed Colab experiments; they are **not** calculated by cloning the repository alone.
+- Do not report validation accuracy as test accuracy, or associate ConvNeXtV2 training curves with the XL weights.
