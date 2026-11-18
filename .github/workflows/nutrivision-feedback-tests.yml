@@ -1,27 +1,43 @@
-name: NutriVision feedback unit tests
+name: NutriVision code and feedback checks
 
 on:
   push:
     paths:
-      - "NutriVision-AI/backend/feedback_store.py"
-      - "NutriVision-AI/tests/**"
+      - "NutriVision-AI/**"
       - ".github/workflows/nutrivision-feedback-tests.yml"
   pull_request:
     paths:
-      - "NutriVision-AI/backend/feedback_store.py"
-      - "NutriVision-AI/tests/**"
+      - "NutriVision-AI/**"
       - ".github/workflows/nutrivision-feedback-tests.yml"
 
 jobs:
-  feedback-tests:
+  prototype-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Check Python syntax
+        working-directory: NutriVision-AI
+        run: python -m compileall -q backend tests
+      - name: Validate slim client notebook
+        working-directory: NutriVision-AI
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          notebooks = sorted(Path("notebooks").glob("*.ipynb"))
+          assert [p.name for p in notebooks] == ["API_Client_Demo.ipynb"], notebooks
+          nb = json.loads(notebooks[0].read_text(encoding="utf-8"))
+          assert nb["nbformat"] == 4
+          code = [c for c in nb["cells"] if c["cell_type"] == "code"]
+          assert 1 <= len(code) <= 10
+          assert all(not c.get("outputs") and c.get("execution_count") is None for c in code)
+          print(f"Verified slim notebook: {len(code)} code cells; no stored outputs")
+          PY
       - name: Install lightweight test dependencies
         run: python -m pip install fastapi pytest
-      - name: Run feedback tests
+      - name: Run SQLite feedback tests
         working-directory: NutriVision-AI
         run: python -m pytest tests -q
