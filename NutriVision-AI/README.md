@@ -25,6 +25,7 @@ NutriVision-AI/
   models/README.md
   tests/test_feedback_store.py
   docs/evaluation_results.md
+  docs/team_handoff.md
   notebooks/README.md
   notebooks/API_Client_Demo.ipynb
   frontend/README.md
@@ -79,6 +80,10 @@ Response includes prediction_id, suggested_food, food101_top3 (raw softmax perce
 ~~~
 
 Returns saved=true on success. Feedback storage does NOT retrain either model and does not store the uploaded picture.
+
+## Team handoff
+
+See [docs/team_handoff.md](docs/team_handoff.md) for responsibilities, private model transfer, startup, API contract, and outstanding work.
 
 ## Tests
 
