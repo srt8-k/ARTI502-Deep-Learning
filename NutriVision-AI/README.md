@@ -26,10 +26,11 @@ NutriVision-AI/
   tests/test_feedback_store.py
   docs/evaluation_results.md
   notebooks/README.md
+  notebooks/API_Client_Demo.ipynb
   frontend/README.md
 ~~~
 
-The actual weights and training notebook are stored in the team's private Drive and are not included in this repository.
+The team-only API usage example is in [notebooks/API_Client_Demo.ipynb](notebooks/API_Client_Demo.ipynb). The full training/research notebook and checkpoint weights remain in the team's private Drive and are not included.
 
 ## Run locally (Python 3.11+)
 
