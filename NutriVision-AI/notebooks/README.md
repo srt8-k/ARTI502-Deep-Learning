@@ -1,15 +1,13 @@
-# NutriVision training notebook
+# Integration notebooks
 
-## Source audit
+Only the short [API_Client_Demo.ipynb](API_Client_Demo.ipynb) is shared with the team.
 
-The original Colab notebook \`NutriVision_AI.ipynb\` was received and reviewed: 133 code cells covering multiple earlier training attempts, official evaluations, and working API experiments. See [the source audit](../docs/notebook_audit.md) for a detailed mapping to the packaged backend.
+It shows how to connect to an already-running NutriVision FastAPI server,
+upload a local food image, read the returned JSON, and submit a user-confirmed correction.
 
-## Before adding the notebook to this public repository
+The full 133-code-cell training/research Colab notebook is intentionally **not included**.
+It belongs in the project's private Google Drive archive, not the collaborative integration folder.
 
-**Never upload the raw Google Colab export.** Its execution metadata contains user account identifiers and output images/logs. A sanitized version prepared in the project conversation removes execution outputs/counts and Colab-specific per-cell account metadata while keeping all source cells. Store that as:
-
-\`notebooks/NutriVision_AI_clean.ipynb\`
-
-This notebook is a research archive, not a single clean top-to-bottom runnable training pipeline. Do not use "Run All" without reworking the experiment dependencies and paths. Keep private weights, image uploads and datasets out of GitHub.
-
-The notebook itself has not yet been uploaded to this repository because the GitHub text-only connector did not support copying the sandbox-generated .ipynb file directly.
+**Important:** This client demo does not train or load DINOv2, SigLIP2, or Nutrition MLP.
+The API server loads the trained checkpoints independently. Its URL must be reachable
+from the computer running the notebook (127.0.0.1 only works for the same machine).
