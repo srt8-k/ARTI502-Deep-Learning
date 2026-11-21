@@ -10,9 +10,32 @@ A university deep-learning application that scans a meal photo and estimates tot
 
 ## Run on Windows
 
-Use Python 3.11+ and Node.js 22 LTS with npm. The Python requirements cover PyTorch, torchvision, timm, Pillow, FastAPI, Uvicorn, multipart uploads and optional SigLIP2 support via Transformers. The frontend lockfile covers React, TypeScript, Vite, Tailwind and Vitest.
+**Use the V3 submission branch**, not the repository's default `main` branch. On a new computer, open PowerShell and run:
 
-**Terminal 1 — API.** From the cloned course repository, enter `NutriVision-AI`. Obtain the four release weights from the team’s private checkpoint archive and place them in `models\` using these exact names:
+```powershell
+git clone --branch nutrivision-v3-release --single-branch https://github.com/srt8-k/ARTI502-Deep-Learning.git
+cd ARTI502-Deep-Learning\NutriVision-AI
+```
+
+If you already cloned the repository, switch to `nutrivision-v3-release` and pull the latest commit before following the instructions below.
+
+Use Python 3.11+ (CI validated with Python 3.11) and Node.js 22 LTS with npm. The Python requirements cover PyTorch, torchvision, timm, Pillow, FastAPI, Uvicorn, multipart uploads and optional SigLIP2 support via Transformers. The frontend lockfile covers React, TypeScript, Vite, Tailwind and Vitest.
+
+**Get the model weights.** Download [NutriVision-models-v3.zip from the official V3 release](https://github.com/srt8-k/ARTI502-Deep-Learning/releases/download/v3.0-submission/NutriVision-models-v3.zip) (approximately 616 MiB). Extract its four `.pth` files **directly into** `NutriVision-AI/models/` (not into another nested folder). The release archive is a separate download; a normal Git clone and GitHub's generated source-code ZIP do not include the model weights.
+
+| Release archive | Value |
+|---|---|
+| [Release page](https://github.com/srt8-k/ARTI502-Deep-Learning/releases/tag/v3.0-submission) | `v3.0-submission` |
+| SHA-256 of ZIP | `3bd6c7012a6898189dec7c68c3d77e0d78cbf2f931552fe312e96c584a19df6f` |
+
+On Windows, if the archive was downloaded into Downloads, you can extract it from the `NutriVision-AI` directory using:
+
+```powershell
+Expand-Archive -LiteralPath "$HOME\Downloads\NutriVision-models-v3.zip" -DestinationPath .\models -Force
+Get-ChildItem .\models\*.pth | Select-Object Name, Length
+```
+
+Use the actual ZIP path if you saved it elsewhere. These exact checkpoint names are required:
 
 | File | Role |
 |---|---|
@@ -33,10 +56,10 @@ $env:NUTRIVISION_OPEN_VOCAB = "0"
 
 Set the model directory to your private checkpoint folder if using another location. The explicit `v2` setting enables the CNN and food gate for the demo. The source defaults to detection off. The commands use CPU or available CUDA and disable optional external model downloads. To enable regional suggestions, set `NUTRIVISION_OPEN_VOCAB=1` in the API shell and restart it; the first run needs access to the Hugging Face model or its local cache.
 
-**Terminal 2 — scanner.** From the course repository:
+**Terminal 2 — scanner.** Open a second PowerShell terminal in the `NutriVision-AI` directory:
 
 ```powershell
-cd NutriVision-AI\frontend
+cd frontend
 npm.cmd ci
 npm.cmd run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
@@ -57,7 +80,7 @@ npm.cmd run typecheck
 npm.cmd run build
 ```
 
-The repeatability integration test skips when private checkpoints or the local pilot pizza photo are absent. The scanner itself accepts your own photos.
+The repeatability integration test skips when the release checkpoints or the local pilot pizza photo are absent. Passing the other automated tests does not prove that the four checkpoints load and produce correct results on a fresh computer. The scanner itself accepts your own photos.
 
 ## Measured results and limits
 
@@ -70,8 +93,7 @@ A single photo does not establish physical scale or reveal the recipe. The six-p
 | Directory | Contents |
 |---|---|
 | `backend/`, `frontend/` | FastAPI inference and feedback; React scanner and frontend tests |
-| `models/` | Private checkpoint setup instructions |
+| `models/` | Instructions for the downloadable release checkpoints |
 | `tests/` | Backend, feedback and regression checks |
 | `tools/`, `notebooks/` | Diagnostic and comparison scripts, API client and Colab experiment |
-| `research/` | Supporting food-detection and suggestion-policy experiments |
 | `docs/` | Evaluation evidence and handoff notes |
