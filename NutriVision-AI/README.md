@@ -89,6 +89,18 @@ Historical held-out Food-101 top-1 accuracy was 92.08% for ConvNeXt and 95.03% f
 
 A single photo does not establish physical scale or reveal the recipe. The six-photo pilot tested recognition and food rejection; it had no measured nutritional ground truth. Regional dish suggestions can be wrong. See the [historical benchmarks](docs/evaluation_results.md) and [pilot evaluation](docs/real_world_evaluation_v3.md).
 
+## Data and pretrained model references
+
+NutriVision fine-tunes or uses pretrained vision backbones; it does not claim to have invented these architectures. Dataset sources and foundational model references:
+
+- [Food-101 (ETH Zürich)](https://huggingface.co/datasets/ethz/food101) — 101-class food recognition dataset.
+- [Nutrition5k (Google Research)](https://github.com/google-research-datasets/Nutrition5k) — measured food nutrition and mass data.
+- [ConvNeXt](https://github.com/facebookresearch/ConvNeXt) and [DINOv2](https://github.com/facebookresearch/dinov2) — image feature extractors.
+- [timm](https://github.com/huggingface/pytorch-image-models) — vision model implementation used at inference.
+- [SigLIP2](https://huggingface.co/google/siglip2-base-patch16-256) — optional zero-shot suggestions.
+
+The repository includes inference, evaluation and nutrition-comparison code, but **not** the original full Food-101 backbone training notebooks, datasets or logs. Results in the evaluation notes are reported from prior experiments; the GitHub CI checks code and tests without re-running full model training.
+
 ## Repository guide
 
 | Directory | Contents |
