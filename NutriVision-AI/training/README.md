@@ -33,6 +33,6 @@ The uploaded archive contains a mixture of baseline, staged training, model comp
 ## Environment and execution notes
 
 - `ConvNeXt_Food101_Training.ipynb`, `DINOv2_Food101_Training.ipynb` and `Nutrition_MLP_Training.ipynb` are **Colab-stage extracts**; they include setup or stage-selection dependencies. Do not claim they are tested end-to-end in an empty Colab runtime.
-- `FoodPresence_V2_Training_Source.py` requires Colab, an NVIDIA GPU, a pre-existing V1 checkpoint, Food5K and the separately acquired original Roboflow zip; it deliberately refuses to overwrite an existing V2 checkpoint.
+- `FoodPresence_V2_Training_Source.py` requires Colab, an NVIDIA GPU, a pre-existing V1 checkpoint, Food5K and the separately acquired original Roboflow zip; it deliberately refuses to overwrite an existing V2 checkpoint. The relevant Python libraries include `torch`, `torchvision`, `timm`, `numpy`, `scikit-learn`, `Pillow`, `tqdm`, and `kagglehub`; this training-only dependency set is intentionally not required for the FastAPI demo.
 - Keep historical results separate from current demo inference. The official held-out numbers were not recomputed by the release CI.
 - Training datasets and original baseline source images were deliberately not bundled into the public source repository.
