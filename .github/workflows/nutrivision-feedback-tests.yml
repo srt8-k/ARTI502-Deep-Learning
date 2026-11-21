@@ -1,4 +1,4 @@
-name: NutriVision code and feedback checks
+name: NutriVision release checks
 
 on:
   push:
@@ -10,34 +10,47 @@ on:
       - "NutriVision-AI/**"
       - ".github/workflows/nutrivision-feedback-tests.yml"
 
+defaults:
+  run:
+    working-directory: NutriVision-AI
+
 jobs:
-  prototype-checks:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Check Python syntax
-        working-directory: NutriVision-AI
-        run: python -m compileall -q backend tests
-      - name: Validate slim client notebook
-        working-directory: NutriVision-AI
+      - name: Validate submission notebooks
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          notebooks = sorted(Path("notebooks").glob("*.ipynb"))
-          assert [p.name for p in notebooks] == ["API_Client_Demo.ipynb"], notebooks
-          nb = json.loads(notebooks[0].read_text(encoding="utf-8"))
-          assert nb["nbformat"] == 4
-          code = [c for c in nb["cells"] if c["cell_type"] == "code"]
-          assert 1 <= len(code) <= 10
-          assert all(not c.get("outputs") and c.get("execution_count") is None for c in code)
-          print(f"Verified slim notebook: {len(code)} code cells; no stored outputs")
+          paths = sorted(Path("notebooks").glob("*.ipynb"))
+          assert [p.name for p in paths] == ["API_Client_Demo.ipynb", "Automatic_Nutrition_Comparison.ipynb"]
+          for path in paths:
+              nb = json.loads(path.read_text(encoding="utf-8"))
+              assert nb["nbformat"] == 4
+              cells = [c for c in nb["cells"] if c["cell_type"] == "code"]
+              assert cells and all(not c.get("outputs") and c.get("execution_count") is None for c in cells)
           PY
-      - name: Install lightweight test dependencies
-        run: python -m pip install fastapi pytest
-      - name: Run SQLite feedback tests
-        working-directory: NutriVision-AI
-        run: python -m pytest tests -q
+      - run: python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -r backend/requirements.txt
+      - run: python -m unittest discover -s tests -v
+        env:
+          OMP_NUM_THREADS: "2"
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: NutriVision-AI/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build

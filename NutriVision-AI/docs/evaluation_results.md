@@ -9,7 +9,7 @@ These are results reported from completed Colab runs. The GitHub prototype has N
 - Held-out DINOv2: Top-1 95.03%, Top-5 99.13%.
 - Held-out ConvNeXt: Top-1 92.08%, Top-5 98.90%.
 - Held-out ensemble: Top-1 95.34%, Top-5 99.38%.
-- These are NOT metrics for the open-vocabulary pipeline. The deployed core prototype uses DINOv2 only, not the 2-backbone ensemble.
+- These are NOT metrics for the open-vocabulary pipeline. V3 exposes both rankings in food-presence V2 mode. It does not deploy the weighted evaluation ensemble.
 
 ## Calorie estimation
 - Nutrition5k upper RGB images; 2,755 official training images and 507 official depth-test IDs with corresponding RGB images in the lightweight image subset.

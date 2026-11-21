@@ -1,99 +1,77 @@
-# NutriVision AI
+# NutriVision AI V3
 
-Food recognition and calorie estimation prototype for ARTI502 Deep Learning.
+A university deep-learning application that scans a meal photo and estimates total energy (kcal) and portion mass (g). The ARTI502 requirements are implemented by a ConvNeXt CNN trained on Food-101, an image-feature regression model trained on Nutrition5k, and a working React scanner backed by FastAPI.
 
-## Components
+## How a scan works
 
-- **DINOv2**: fine-tuned Food-101 classifier (101 classes) and shared 768-dimensional visual features.
-- **Nutrition MLP**: estimates total calories directly from the DINOv2 features; no second visual backbone is needed.
-- **SigLIP2** *(optional)*: zero-shot suggestions for regional dishes (e.g., kabsa/mandi) and plausible ingredients; outputs are NOT verified ingredient detections.
-- **FastAPI**: POST /predict, POST /feedback, and GET /health. SQLite stores text feedback and prediction metadata, not images.
+1. React uploads a JPEG or PNG to `POST /predict`. In V2 mode, ConvNeXt produces Food-101 predictions and the food-presence head checks its visual features. When the detector rejects an image, the API skips nutrition inference and returns null for both estimates.
+2. For food images, a fine-tuned DINOv2 classifier supplies a second Food-101 ranking and a 768-dimensional visual representation. The deployed Nutrition MLP uses standardized features to predict whole-image calories and grams automatically. No scale reading or manual portion entry is required.
+3. Optional SigLIP2 supplies regional dish and ingredient suggestions. The UI distinguishes provisional names from user selections. `POST /feedback` records a corrected name and confirmed ingredients in local SQLite. Corrections do not recalculate nutrition or retrain the models.
 
-The original two-model classification ensemble achieved **95.34% held-out Food-101 Top-1**, but this deployment uses DINOv2 alone (**95.03% held-out Top-1**). Nutrition MLP achieved **64.99 kcal MAE** on 507 Nutrition5k test images. These metrics do not establish performance of the complete system on arbitrary smartphone or Saudi dishes. See docs/evaluation_results.md.
+## Run on Windows
 
-## Structure
+Use Python 3.11+ and Node.js 22 LTS with npm. The Python requirements cover PyTorch, torchvision, timm, Pillow, FastAPI, Uvicorn, multipart uploads and optional SigLIP2 support via Transformers. The frontend lockfile covers React, TypeScript, Vite, Tailwind and Vitest.
 
-~~~text
-NutriVision-AI/
-  backend/
-    __init__.py
-    ai_service.py
-    nutrivision_api.py
-    feedback_store.py
-    requirements.txt
-    .env.example
-  models/README.md
-  tests/test_feedback_store.py
-  docs/evaluation_results.md
-  docs/team_handoff.md
-  notebooks/README.md
-  notebooks/API_Client_Demo.ipynb
-  frontend/README.md
-~~~
+**Terminal 1 — API.** From the cloned course repository, enter `NutriVision-AI`. Obtain the four release weights from the team’s private checkpoint archive and place them in `models\` using these exact names:
 
-The team-only API usage example is in [notebooks/API_Client_Demo.ipynb](notebooks/API_Client_Demo.ipynb). The full training/research notebook and checkpoint weights remain in the team's private Drive and are not included.
+| File | Role |
+|---|---|
+| `convnext_stage3_best.pth` | ConvNeXt Food-101 classifier |
+| `food_presence_head_v2.pth` | Matching binary detector head |
+| `dinov2_last4_best.pth` | Food-101 classifier and nutrition feature extractor |
+| `nutrition_mlp_best.pth` | Released six-output nutrition regression head and normalization |
 
-## Run locally (Python 3.11+)
+```powershell
+cd NutriVision-AI
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+$env:NUTRIVISION_MODEL_DIR = (Resolve-Path .\models).Path
+$env:NUTRIVISION_FOOD_PRESENCE_MODE = "v2"
+$env:NUTRIVISION_OPEN_VOCAB = "0"
+.\.venv\Scripts\python.exe -m uvicorn backend.nutrivision_api:app --host 127.0.0.1 --port 8000
+```
 
-1. Clone the course repository and change into NutriVision-AI.
-2. Create and activate a Python virtual environment.
-3. Install PyTorch/torchvision appropriate to your platform, then: pip install -r backend/requirements.txt
-4. Put dinov2_last4_best.pth and nutrition_mlp_best.pth in models/, or set NUTRIVISION_MODEL_DIR to their shared directory.
-5. For the lighter version without SigLIP2, set NUTRIVISION_OPEN_VOCAB=0 before startup. Default is enabled (1); first run downloads the external SigLIP2 weights and needs substantial memory.
-6. Start from the NutriVision-AI folder:
+Set the model directory to your private checkpoint folder if using another location. The explicit `v2` setting enables the CNN and food gate for the demo. The source defaults to detection off. The commands use CPU or available CUDA and disable optional external model downloads. To enable regional suggestions, set `NUTRIVISION_OPEN_VOCAB=1` in the API shell and restart it; the first run needs access to the Hugging Face model or its local cache.
 
-~~~bash
-uvicorn backend.nutrivision_api:app --host 127.0.0.1 --port 8000
-~~~
+**Terminal 2 — scanner.** From the course repository:
 
-Open http://127.0.0.1:8000/docs for interactive API documentation.
+```powershell
+cd NutriVision-AI\frontend
+npm.cmd ci
+npm.cmd run dev -- --host 127.0.0.1 --port 5173 --strictPort
+```
 
-**Windows PowerShell**: Set environment variables with $env:NUTRIVISION_MODEL_DIR="C:\path\to\checkpoints" and $env:NUTRIVISION_OPEN_VOCAB="0".
-**Linux/macOS**: export NUTRIVISION_MODEL_DIR=/path/to/checkpoints and export NUTRIVISION_OPEN_VOCAB=0.
+Open [the scanner](http://127.0.0.1:5173/#scanner). Vite forwards requests to the API on port 8000. Check [API health](http://127.0.0.1:8000/health) for `ready` and `v2`. The [interactive API docs](http://127.0.0.1:8000/docs) accept direct image uploads.
 
-CUDA GPU is used automatically when available; CPU is supported. CPU startup and inference speed depend on device and enabled models. Only run one Uvicorn worker for this memory-intensive prototype.
+## Verify the demo
 
-## API contract
+Upload a meal, select **Analyze photo**, and check its name, kcal and grams. Open **Correct This Result** and save a food-name correction. Try an empty plate and check that a no-food decision suppresses both numbers. Uploads are limited to 10 MB and 20 million pixels. Uploaded photos are not stored in the feedback database.
 
-**GET /health** returns startup status and device.
+Run these checks from `NutriVision-AI` after installing both dependency sets:
 
-**POST /predict** accepts multipart/form-data:
-- image: JPEG or PNG, maximum 10 MB / 20 million pixels
-- analyze_ingredients: optional boolean, default true
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+cd frontend
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run build
+```
 
-Example:
+The repeatability integration test skips when private checkpoints or the local pilot pizza photo are absent. The scanner itself accepts your own photos.
 
-~~~bash
-curl -X POST http://127.0.0.1:8000/predict -F "image=@food.jpg" -F "analyze_ingredients=true"
-~~~
+## Measured results and limits
 
-Response includes prediction_id, suggested_food, food101_top3 (raw softmax percentage), open_vocab_suggestions, possible_ingredients, estimated_calories, calorie_unit, requires_confirmation, device, inference_seconds, and message. No classification confidence is a calibrated probability. Always allow users to correct labels.
+Historical held-out Food-101 top-1 accuracy was 92.08% for ConvNeXt and 95.03% for DINOv2. A paired evaluation on 507 Nutrition5k dishes measured **64.96 kcal MAE and 38.36 g mass MAE** for the release MLP. An experimental density head reached 60.98 kcal and 40.56 g, improving energy error while worsening mass error. The application retains the release MLP.
 
-**POST /feedback** accepts JSON:
+A single photo does not establish physical scale or reveal the recipe. The six-photo pilot tested recognition and food rejection; it had no measured nutritional ground truth. Regional dish suggestions can be wrong. See the [historical benchmarks](docs/evaluation_results.md) and [pilot evaluation](docs/real_world_evaluation_v3.md).
 
-~~~json
-{
-  "prediction_id": "copy-the-id-from-predict",
-  "corrected_food": "Chicken Kabsa",
-  "confirmed_ingredients": ["chicken", "rice"]
-}
-~~~
+## Repository guide
 
-Returns saved=true on success. Feedback storage does NOT retrain either model and does not store the uploaded picture.
-
-## Team handoff
-
-See [docs/team_handoff.md](docs/team_handoff.md) for responsibilities, private model transfer, startup, API contract, and outstanding work.
-
-## Tests
-
-Install pytest and fastapi then, from NutriVision-AI, run: python -m pytest tests -q
-
-Unit tests cover SQLite feedback. Inference integration tests require both private checkpoints, suitable hardware and downloading SigLIP2 when enabled. The deployment was smoke-tested in Colab; code in this repository still needs a fresh-machine reproducibility test before release.
-
-## Development safety and limitations
-
-- This is a **local development prototype**, not a hardened public service. Add authentication, authorization, CORS allow-list, rate limits, error monitoring, deployment configuration and a privacy/retention policy before exposing it to the Internet.
-- The temporary confirmation heuristic is not a validated out-of-distribution detector. Food/ingredient suggestions can be wrong even when raw softmax is high.
-- Calorie output is for the whole photographed plate; it does not estimate every ingredient's individual mass or accurately handle unseen recipes.
-- Keep weights, images, personal data, tokens, .env and SQLite databases out of the public course repository.
+| Directory | Contents |
+|---|---|
+| `backend/`, `frontend/` | FastAPI inference and feedback; React scanner and frontend tests |
+| `models/` | Private checkpoint setup instructions |
+| `tests/` | Backend, feedback and regression checks |
+| `tools/`, `notebooks/` | Diagnostic and comparison scripts, API client and Colab experiment |
+| `research/` | Supporting food-detection and suggestion-policy experiments |
+| `docs/` | Evaluation evidence and handoff notes |

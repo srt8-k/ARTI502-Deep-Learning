@@ -4,6 +4,7 @@ import json
 import os
 import sqlite3
 import uuid
+from contextlib import closing
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -24,7 +25,7 @@ def connect():
 
 def init_db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with connect() as db:
+    with closing(connect()) as db, db:
         db.execute(
             """
             CREATE TABLE IF NOT EXISTS predictions (
@@ -41,7 +42,7 @@ def init_db():
 
 def register_prediction(result: dict):
     prediction_id = str(uuid.uuid4())
-    with connect() as db:
+    with closing(connect()) as db, db:
         db.execute(
             "INSERT INTO predictions (prediction_id, result_json) VALUES (?, ?)",
             (prediction_id, json.dumps(result, ensure_ascii=False)),
@@ -57,7 +58,7 @@ class FoodCorrection(BaseModel):
 
 @router.post("/feedback")
 def save_feedback(feedback: FoodCorrection):
-    with connect() as db:
+    with closing(connect()) as db, db:
         row = db.execute(
             "SELECT prediction_id FROM predictions WHERE prediction_id = ?",
             (feedback.prediction_id,),

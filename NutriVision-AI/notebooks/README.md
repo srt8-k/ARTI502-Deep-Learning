@@ -1,13 +1,6 @@
-# Integration notebooks
+# NutriVision notebooks
 
-Only the short [API_Client_Demo.ipynb](API_Client_Demo.ipynb) is shared with the team.
+- [API client demo](API_Client_Demo.ipynb) sends an image to a running FastAPI service and submits feedback. Its API URL must be reachable from the notebook runtime.
+- [Automatic nutrition comparison](Automatic_Nutrition_Comparison.ipynb) reproduces the offline Nutrition5k comparison using Google Drive and private release checkpoints. The scanner runs independently of this experiment.
 
-It shows how to connect to an already-running NutriVision FastAPI server,
-upload a local food image, read the returned JSON, and submit a user-confirmed correction.
-
-The full 133-code-cell training/research Colab notebook is intentionally **not included**.
-It belongs in the project's private Google Drive archive, not the collaborative integration folder.
-
-**Important:** This client demo does not train or load DINOv2, SigLIP2, or Nutrition MLP.
-The API server loads the trained checkpoints independently. Its URL must be reachable
-from the computer running the notebook (127.0.0.1 only works for the same machine).
+The original full research notebook, training datasets and weights remain in private storage.

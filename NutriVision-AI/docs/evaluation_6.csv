@@ -1,0 +1,7 @@
+﻿"Image","Category","GroundTruth","ExpectedFood","DetectedFood","DetectionCorrect","FoodScorePercent","ConvNeXt","DINOv2","SigLIP2","Calories","PortionGrams","InferenceSeconds"
+"01_pizza.jpg","food101","pizza","True","True","True","99.97","pizza","pizza","pizza","452.9","286.9","5.807"
+"02_hamburger.jpg","food101","hamburger","True","True","True","97.62","hamburger","hamburger","hamburger","562.4","355.9","5.25"
+"03_mandi.jpg","saudi_food","mandi","True","True","True","100.0","chicken_curry","chicken_curry","Saudi Arabian chicken kabsa with spiced rice","578.9","637.2","5.232"
+"04_kabsa.jpg","saudi_food","kabsa","True","True","True","100.0","chicken_curry","chicken_curry","Saudi Arabian lamb kabsa with rice","163.4","161.9","5.135"
+"05_empty_plate.jpg","non_food","no_food","False","False","True","1.13","","","",,,"0.362"
+"06_kitchen_utensils.jpg","non_food","no_food","False","False","True","0.46","","","",,,"0.336"
