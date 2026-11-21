@@ -1,6 +1,6 @@
 # Recorded evaluation evidence (2026-11)
 
-These are results reported from completed Colab runs. The GitHub prototype has NOT independently re-run these experiments. Detailed evidence is saved in the team's private Drive checkpoints and prediction artifacts.
+These are results reported from completed Colab runs. The GitHub prototype has NOT independently re-run these experiments. The released inference checkpoints are available via the project's GitHub Release, but the complete original training logs, training code and per-dish experiment artifacts are not bundled here. Treat the historical benchmark figures as reported results, not independently reproduced results from this repository.
 
 ## Food-101 classification
 - 101 classes; official test split has 25,250 images.
