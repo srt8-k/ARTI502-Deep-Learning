@@ -89,6 +89,20 @@ Historical held-out Food-101 top-1 accuracy was 92.08% for ConvNeXt and 95.03% f
 
 A single photo does not establish physical scale or reveal the recipe. The six-photo pilot tested recognition and food rejection; it had no measured nutritional ground truth. Regional dish suggestions can be wrong. See the [historical benchmarks](docs/evaluation_results.md) and [pilot evaluation](docs/real_world_evaluation_v3.md).
 
+## Training source
+
+The original training workflow is documented at **[training/README.md](training/README.md)**. Open the model-specific files if the course examiner wants to review how the saved models were developed:
+
+| Component | Training source |
+|---|---|
+| ConvNeXt Food-101 CNN | [ConvNeXt_Food101_Training.ipynb](training/ConvNeXt_Food101_Training.ipynb) |
+| DINOv2 Food-101 classifier | [DINOv2_Food101_Training.ipynb](training/DINOv2_Food101_Training.ipynb) |
+| Nutrition5k regression MLP | [Nutrition_MLP_Training.ipynb](training/Nutrition_MLP_Training.ipynb) |
+| Food Presence V2 | [FoodPresence_V2_Training_Source.py](training/FoodPresence_V2_Training_Source.py) |
+| Full chronological project experiments | [Original_NutriVision_Research.ipynb](training/Original_NutriVision_Research.ipynb) |
+
+These are **source records**, not a guarantee that all cells run in order in a fresh environment. The V2 script also relies on an earlier V1 food-presence head and additional external datasets. See the training README for exact prerequisites, preserved cell provenance and honest reproducibility limits. **No training is required to run the application:** download the four release checkpoints instead.
+
 ## Data and pretrained model references
 
 NutriVision fine-tunes or uses pretrained vision backbones; it does not claim to have invented these architectures. Dataset sources and foundational model references:
@@ -99,7 +113,7 @@ NutriVision fine-tunes or uses pretrained vision backbones; it does not claim to
 - [timm](https://github.com/huggingface/pytorch-image-models) — vision model implementation used at inference.
 - [SigLIP2](https://huggingface.co/google/siglip2-base-patch16-256) — optional zero-shot suggestions.
 
-The repository includes inference, evaluation and nutrition-comparison code, but **not** the original full Food-101 backbone training notebooks, datasets or logs. Results in the evaluation notes are reported from prior experiments; the GitHub CI checks code and tests without re-running full model training.
+The [training/](training/) directory includes original Food-101 backbone and Nutrition MLP training cells extracted from the original Colab research notebook, plus the separate Food Presence V2 development script. The outputs and private datasets are excluded. Results in the evaluation notes are reported from prior experiments; GitHub CI checks notebook structure and application tests **without** re-running the full training or independently reproducing historical benchmark numbers.
 
 ## Repository guide
 
@@ -109,4 +123,5 @@ The repository includes inference, evaluation and nutrition-comparison code, but
 | `models/` | Instructions for the downloadable release checkpoints |
 | `tests/` | Backend, feedback and regression checks |
 | `tools/`, `notebooks/` | Diagnostic and comparison scripts, API client and Colab experiment |
+| `training/` | Original model training source, historical research notebook and reproducibility notes |
 | `docs/` | Evaluation evidence and handoff notes |
