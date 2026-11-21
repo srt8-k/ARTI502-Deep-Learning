@@ -11,6 +11,7 @@ import timm
 import torch
 from PIL import Image, ImageOps
 from torchvision import transforms as T
+from .food_choice import food_choice
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -188,6 +189,8 @@ class NutriVisionService:
                 nutrition_output * self.target_std + self.target_mean
             )
             calories = torch.expm1(restored[:, 0].clamp(0, 9)).clamp_min(0).item()
+            # Target index 1 = total_mass_g, trained on Nutrition5k.
+            portion_mass = torch.expm1(restored[:, 1].clamp(0, 9)).clamp_min(0).item()
 
         top3 = [
             {
@@ -197,17 +200,13 @@ class NutriVisionService:
             for score, index in zip(values, indices)
         ]
         dishes, ingredients = self._visual_suggestions(image, include_ingredients)
-        suggestion = dishes[0] if dishes else top3[0]["name"]
+        suggestion, candidates = food_choice(top3[0]["name"], dishes)
 
         top1 = float(values[0])
         margin = float(values[0] - values[1])
-        names_disagree = bool(dishes) and (
-            dishes[0].strip().lower().replace("_", " ")
-            != top3[0]["name"].strip().lower().replace("_", " ")
-        )
         # Review heuristic ONLY. It is not a calibrated OOD classifier.
         requires_confirmation = (
-            top1 < 0.50 or margin < 0.20 or names_disagree
+            top1 < 0.50 or margin < 0.20 or suggestion is None
         )
 
         if self.device.type == "cuda":
@@ -216,10 +215,12 @@ class NutriVisionService:
 
         return {
             "suggested_food": suggestion,
+            "food_candidates": candidates,
             "food101_top3": top3,
             "open_vocab_suggestions": dishes,
             "possible_ingredients": ingredients,
             "estimated_calories": round(calories, 1),
+            "estimated_portion_mass_g": round(portion_mass, 1),
             "calorie_unit": "kcal",
             "requires_confirmation": bool(requires_confirmation),
             "user_can_correct_food": True,
