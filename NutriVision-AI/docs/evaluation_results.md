@@ -1,6 +1,6 @@
 # Recorded evaluation evidence (2026-11)
 
-These are results reported from completed Colab runs. The GitHub prototype has NOT independently re-run these experiments. The released inference checkpoints are available via the project's GitHub Release. Original model-training source and notebook extracts are included in [training/](../training/), but complete training outputs, dataset copies and per-dish experiment artifacts are not bundled here. Treat the historical benchmark figures as reported results, not independently reproduced results from this repository.
+These are results reported from completed Colab runs. The GitHub prototype has NOT independently re-run these experiments. The released inference checkpoints are available via the project's GitHub Release. Original model-training source and notebook extracts are included in [training/](../training/README.md), but complete training outputs, dataset copies and per-dish experiment artifacts are not bundled here. Treat the historical benchmark figures as reported results, not independently reproduced results from this repository.
 
 ## Food-101 classification
 - 101 classes; official test split has 25,250 images.
