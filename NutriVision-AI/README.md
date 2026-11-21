@@ -44,8 +44,9 @@ Use the actual ZIP path if you saved it elsewhere. These exact checkpoint names 
 | `dinov2_last4_best.pth` | Food-101 classifier and nutrition feature extractor |
 | `nutrition_mlp_best.pth` | Released six-output nutrition regression head and normalization |
 
+**Terminal 1 — API.** Continue in the `NutriVision-AI` directory opened above:
+
 ```powershell
-cd NutriVision-AI
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 $env:NUTRIVISION_MODEL_DIR = (Resolve-Path .\models).Path
@@ -54,7 +55,7 @@ $env:NUTRIVISION_OPEN_VOCAB = "0"
 .\.venv\Scripts\python.exe -m uvicorn backend.nutrivision_api:app --host 127.0.0.1 --port 8000
 ```
 
-Set the model directory to your private checkpoint folder if using another location. The explicit `v2` setting enables the CNN and food gate for the demo. The source defaults to detection off. The commands use CPU or available CUDA and disable optional external model downloads. To enable regional suggestions, set `NUTRIVISION_OPEN_VOCAB=1` in the API shell and restart it; the first run needs access to the Hugging Face model or its local cache.
+Set the model directory to any folder containing the four extracted release checkpoints if using another location. The explicit `v2` setting enables the CNN and food gate for the demo. The source defaults to detection off. The commands use CPU or available CUDA and disable optional external model downloads. To enable regional suggestions, set `NUTRIVISION_OPEN_VOCAB=1` in the API shell and restart it; the first run needs access to the Hugging Face model or its local cache.
 
 **Terminal 2 — scanner.** Open a second PowerShell terminal in the `NutriVision-AI` directory:
 
