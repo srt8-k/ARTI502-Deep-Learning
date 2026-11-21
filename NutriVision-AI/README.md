@@ -113,7 +113,7 @@ NutriVision fine-tunes or uses pretrained vision backbones; it does not claim to
 - [timm](https://github.com/huggingface/pytorch-image-models) — vision model implementation used at inference.
 - [SigLIP2](https://huggingface.co/google/siglip2-base-patch16-256) — optional zero-shot suggestions.
 
-The [training/](training/) directory includes original Food-101 backbone and Nutrition MLP training cells extracted from the original Colab research notebook, plus the separate Food Presence V2 development script. The outputs and private datasets are excluded. Results in the evaluation notes are reported from prior experiments; GitHub CI checks notebook structure and application tests **without** re-running the full training or independently reproducing historical benchmark numbers.
+The [training source directory](training/README.md) includes original Food-101 backbone and Nutrition MLP training cells extracted from the original Colab research notebook, plus the separate Food Presence V2 development script. The outputs and private datasets are excluded. Results in the evaluation notes are reported from prior experiments; GitHub CI checks notebook structure and application tests **without** re-running the full training or independently reproducing historical benchmark numbers.
 
 ## Repository guide
 
